@@ -57,7 +57,7 @@ func setHandlers(mux *http.ServeMux) {
 	files := http.FileServer(http.Dir("./static"))
 	mux.Handle("/", http.StripPrefix("/static/", files))
 
-	mux.HandleFunc("/game/", activeGame)
+	mux.HandleFunc("/game/", game)
 }
 
 func startHTTPServer(args serverArgs) *http.Server {
