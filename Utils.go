@@ -3,8 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // CheckPort checks that a port entered is correctly defined.
@@ -40,5 +42,21 @@ func CheckPort(port string) (string, error) {
 	}
 
 	return port, nil
+
+}
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+func RandomSession() string {
+	//16 byte array
+	b := make([]byte, 16)
+
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+
+	return string(b)
 
 }

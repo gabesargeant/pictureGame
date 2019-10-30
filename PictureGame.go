@@ -55,7 +55,9 @@ func setHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("/index/", indexHandler)
 
 	files := http.FileServer(http.Dir("./static"))
-	mux.Handle("/", files)
+	mux.Handle("/", http.StripPrefix("/static/", files))
+
+	mux.HandleFunc("/game/", activeGame)
 }
 
 func startHTTPServer(args serverArgs) *http.Server {
@@ -70,11 +72,4 @@ func startHTTPServer(args serverArgs) *http.Server {
 		Handler:      mux}
 
 	return srv
-}
-
-func indexHandler(writer http.ResponseWriter, r *http.Request) {
-	t := time.Now()
-	t.Format(time.RFC822Z)
-	fmt.Fprintf(writer, "The Time is....., %s!", t)
-	fmt.Println("Fresh Server hit!")
 }
