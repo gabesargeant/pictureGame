@@ -14,6 +14,11 @@ type serverArgs struct {
 	port string
 }
 
+type appContext struct {
+	active     int
+	sessionIds []string
+}
+
 func getServerArgs() serverArgs {
 	port := flag.String("p", ":8080", "Port for the server, must include : prefix, ie :8080")
 	flag.Parse()
@@ -35,9 +40,11 @@ func main() {
 		abortStartUp(err)
 	}
 
-	srv := startHTTPServer(args)
+	cntxt := &appContext{}
+
+	srv := startHTTPServer(args, cntxt)
 	fmt.Printf("Starting on port %s \n", args.port)
-	fmt.Println("Starting Cache Test Server")
+	fmt.Println("Starting Picture Game Server")
 
 	log.Fatal(srv.ListenAndServe())
 
@@ -49,7 +56,7 @@ func main() {
 	fmt.Println("Server off")
 }
 
-func setHandlers(mux *http.ServeMux) {
+func setHandlers(mux *http.ServeMux, context *appContext) {
 
 	//mux.HandleFunc("/", indexHandler)
 	mux.HandleFunc("/index/", indexHandler)
@@ -57,13 +64,16 @@ func setHandlers(mux *http.ServeMux) {
 	files := http.FileServer(http.Dir("./static"))
 	mux.Handle("/", http.StripPrefix("/static/", files))
 
-	mux.HandleFunc("/game/", game)
+	game := gameHandler(context)
+
+	mux.Handle("/game/", game)
+
 }
 
-func startHTTPServer(args serverArgs) *http.Server {
+func startHTTPServer(args serverArgs, context *appContext) *http.Server {
 
 	mux := http.NewServeMux()
-	setHandlers(mux)
+	setHandlers(mux, context)
 
 	srv := &http.Server{
 		ReadTimeout:  1 * time.Second,
