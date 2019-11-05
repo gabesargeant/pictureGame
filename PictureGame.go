@@ -15,8 +15,14 @@ type serverArgs struct {
 }
 
 type appContext struct {
-	active     int
-	sessionIds []string
+	active         int
+	sessionIds     []string
+	usersBySession []userInSessions
+}
+
+type userInSessions struct {
+	session      string
+	usersCookies []http.Cookie
 }
 
 func getServerArgs() serverArgs {
@@ -56,24 +62,25 @@ func main() {
 	fmt.Println("Server off")
 }
 
-func setHandlers(mux *http.ServeMux, context *appContext) {
+func setHandlers(context *appContext) *http.ServeMux {
 
-	//mux.HandleFunc("/", indexHandler)
-	mux.HandleFunc("/index/", indexHandler)
+	mux := http.NewServeMux()
 
-	files := http.FileServer(http.Dir("./static"))
+	files := http.FileServer(http.Dir("/static"))
 	mux.Handle("/", http.StripPrefix("/static/", files))
 
-	game := gameHandler(context)
+	mux.HandleFunc("/", indexHandler)
+	mux.HandleFunc("/index/", indexHandler)
 
+	game := gameHandler(context)
 	mux.Handle("/game/", game)
 
+	return mux
 }
 
 func startHTTPServer(args serverArgs, context *appContext) *http.Server {
 
-	mux := http.NewServeMux()
-	setHandlers(mux, context)
+	mux := setHandlers(context)
 
 	srv := &http.Server{
 		ReadTimeout:  1 * time.Second,

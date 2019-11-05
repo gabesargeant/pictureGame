@@ -3,7 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
+	"os/exec"
 	"regexp"
 	"strings"
 	"time"
@@ -49,6 +51,8 @@ const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
+//RandomSession creates a random 16 letter and number string for
+//representing a sharable game string
 func RandomSession() string {
 	//16 byte array
 	b := make([]byte, 16)
@@ -59,4 +63,13 @@ func RandomSession() string {
 
 	return string(b)
 
+}
+
+//GetUUID returns a UUID
+func GetUUID() string {
+	uuid, err := exec.Command("uuidgen").Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(uuid)
 }

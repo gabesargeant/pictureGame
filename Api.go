@@ -50,13 +50,33 @@ func game(context *appContext, writer http.ResponseWriter, request *http.Request
 	if !validSession {
 		log.Printf("no valid session, lets create one...")
 		sess := newGameSession()
+		cookie := newUserCookie()
+
+		uSess := userInSessions{
+			session: sess,
+		}
+		uSess.usersCookies = append(uSess.usersCookies, cookie)
+
+		context.usersBySession = append(context.usersBySession, uSess)
+
 		context.sessionIds = append(context.sessionIds, sess)
 
 		redir := "/game/" + sess + "/"
+
 		log.Printf("redirecting to %s", redir)
 		http.Redirect(writer, request, redir, http.StatusSeeOther)
 	}
 
+}
+
+func newUserCookie() http.Cookie {
+
+	cookie := http.Cookie{
+		Name:     "_gameCookie",
+		Value:    GetUUID(),
+		HttpOnly: true,
+	}
+	return cookie
 }
 
 func newGameSession() string {
