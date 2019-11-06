@@ -1,20 +1,39 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
-	"time"
 )
 
-func indexHandler(writer http.ResponseWriter, request *http.Request) {
-	t := time.Now()
-	t.Format(time.RFC822Z)
-	fmt.Fprintf(writer, "The Time is....., %s!", t)
-	fmt.Println("Fresh Server hit!")
+func indexHandler(context *appContext) http.Handler {
+	return (http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			index(context, w, r)
+		}))
+}
+
+func index(context *appContext, writer http.ResponseWriter, request *http.Request) {
+
+	sess := newGameSession()
+	cookie := newUserCookie()
+
+	uSess := userInSessions{
+		session: sess,
+	}
+	uSess.usersCookies = append(uSess.usersCookies, cookie)
+
+	context.usersBySession = append(context.usersBySession, uSess)
+
+	context.sessionIds = append(context.sessionIds, sess)
+
+	redir := "/game/" + sess + "/"
+
+	log.Printf("redirecting to %s", redir)
+	http.Redirect(writer, request, redir, http.StatusSeeOther)
+
 }
 
 //gameandler is a wrapped version of the http.HandlerFunc
@@ -41,30 +60,19 @@ func game(context *appContext, writer http.ResponseWriter, request *http.Request
 	s := u.Path
 	log.Printf("path %s", u)
 
-	validSession := isCorrect(context, s)
+	validSession(isCorrect(context, s), writer, request)
 
-	if validSession {
-		log.Printf("Game running %s", s)
+}
 
-	}
-	if !validSession {
-		log.Printf("no valid session, lets create one...")
-		sess := newGameSession()
-		cookie := newUserCookie()
+func validSession(correct bool, writer http.ResponseWriter, request *http.Request) {
 
-		uSess := userInSessions{
-			session: sess,
-		}
-		uSess.usersCookies = append(uSess.usersCookies, cookie)
-
-		context.usersBySession = append(context.usersBySession, uSess)
-
-		context.sessionIds = append(context.sessionIds, sess)
-
-		redir := "/game/" + sess + "/"
-
-		log.Printf("redirecting to %s", redir)
-		http.Redirect(writer, request, redir, http.StatusSeeOther)
+	if correct {
+		log.Print("Game running...")
+	} else {
+		index := "/index"
+		log.Printf("not  a valid session to %s", index)
+		log.Printf("redirecting to %s", index)
+		http.Redirect(writer, request, index, http.StatusSeeOther)
 	}
 
 }

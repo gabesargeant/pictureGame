@@ -67,10 +67,11 @@ func setHandlers(context *appContext) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	files := http.FileServer(http.Dir("/static"))
-	mux.Handle("/", http.StripPrefix("/static/", files))
+	mux.Handle("/static/", http.StripPrefix("/static/", files))
 
-	mux.HandleFunc("/", indexHandler)
-	mux.HandleFunc("/index/", indexHandler)
+	index := indexHandler(context)
+	mux.Handle("/", index)
+	mux.Handle("/index/", index)
 
 	game := gameHandler(context)
 	mux.Handle("/game/", game)
