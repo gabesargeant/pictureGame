@@ -16,12 +16,24 @@
 
 </head>
 <body>
-<div id="canvasDiv" style="border-color: #000;"></div>
 
+<div id="canvasDiv" style="border-color: #000;"></div>
+<button id="erasor" type="button">Erasor</button> 
 </body>
 
 <script>
     
+  var erasor = false;
+
+  $("#erasor").click(function(){
+       if(erasor){
+        erasor = false
+       } else{
+         erasor = true;
+       }
+  });  
+
+
   var canvasDiv = document.getElementById('canvasDiv');
   canvas = document.createElement('canvas');
   canvas.setAttribute('width', 750);
@@ -76,9 +88,17 @@
   function redraw(){
     context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
     
-    context.strokeStyle = "#FF0000";
-    context.lineJoin = "round";
-    context.lineWidth = 3;
+    if(erasor){
+      context.strokeStyle = "#000000";
+      context.lineJoin = "round";
+      context.lineWidth = 20;
+
+    }else{
+      context.strokeStyle = "#FF0000";
+      context.lineJoin = "round";
+      context.lineWidth = 3;
+
+    }
         
     for(var i=0; i < clickX.length; i++) {
 
