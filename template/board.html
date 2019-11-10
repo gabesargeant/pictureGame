@@ -19,6 +19,7 @@
 
 <div id="canvasDiv" style="border-color: #000;"></div>
 <button id="erasor" type="button">Erasor</button> 
+<button id="clearCanvas" type="button">Reset Canvas</button> 
 </body>
 
 <script>
@@ -35,12 +36,15 @@
        }
   });  
 
+  $("#clearCanvas").click(function(){
+      context.clearRect(0, 0, context.canvas.width, context.canvas.height); 
+  }); 
+
   function resetLine(){
       clickX = [];
       clickY = [];
       clickDrag = [];
   }
-
 
   var canvasDiv = document.getElementById('canvasDiv');
   canvas = document.createElement('canvas');
@@ -93,11 +97,13 @@
     clickDrag.push(dragging);
   }
 
+
+
   function redraw(){
-    //context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+    
     context = canvas.getContext("2d");
     if(erasor){
-      context.strokeStyle = "#000000";
+      context.strokeStyle = "#ffffff";
       context.lineJoin = "round";
       context.lineWidth = 20;
       
